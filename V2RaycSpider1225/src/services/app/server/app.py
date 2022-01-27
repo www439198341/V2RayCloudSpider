@@ -5,7 +5,7 @@
 # Description:
 __all__ = ["app"]
 
-from sanic import Sanic
+from sanic import Sanic, response
 from sanic.request import Request
 from sanic.response import redirect, json, HTTPResponse
 
@@ -14,6 +14,7 @@ from services.app.server.apis import (
     apis_admin_get_subs_v2,
     apis_admin_get_pool_status,
 )
+from services.app.server.myfunc import get_config
 from services.settings import (
     ROUTER_API, ROUTER_NAME
 )
@@ -94,6 +95,11 @@ def pool_status(request: Request) -> HTTPResponse:
     """
 
     return json(apis_admin_get_pool_status())
+
+
+@app.route('/clash/<token>', methods=['GET'])
+def get_v2spider(request, token):
+    return response.text(get_config(token))
 
 
 if __name__ == '__main__':
