@@ -24,5 +24,5 @@ def get_clash(token):
 
 def get_config(token):
     _config = get_clash(token)
-    return _config if token == 'v2ray' else get_clash_config(_config)
+    return requests.get(_config) if token == 'v2ray' else get_clash_config(_config)
 
