@@ -130,4 +130,8 @@ dmypy.json
 *.iml
 
 .pyre/
-.idea/
+.idea
+src/database
+src/config.yaml
+docker-compose.yaml
+tests/
