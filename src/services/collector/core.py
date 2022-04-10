@@ -18,7 +18,7 @@ from requests.exceptions import (
     Timeout,
     RequestException,
 )
-from selenium.common.exceptions import WebDriverException, TimeoutException
+from selenium.common.exceptions import WebDriverException, TimeoutException,InvalidSessionIdException
 from selenium.webdriver import Chrome, ChromeOptions
 from urllib3.exceptions import MaxRetryError
 from webdriver_manager.chrome import ChromeDriverManager
@@ -309,10 +309,6 @@ class TheElderBlood:
     def _update_clock(self):
         self.work_clock_utils = time.time()
 
-    def waiting_to_load(self, ctx: Chrome):
-        """register --> dashboard 等待页面跳转"""
-        raise NotImplementedError
-
     def set_chrome_options(self):
         options = ChromeOptions()
 
@@ -371,6 +367,10 @@ class TheElderBlood:
         """注册账号"""
         raise NotImplementedError
 
+    def waiting_to_load(self, ctx: Chrome):
+        """register --> dashboard 等待页面跳转"""
+        raise NotImplementedError
+
     def buy_free_plan(self, ctx: Chrome):
         """购买免费套餐"""
         raise NotImplementedError
@@ -391,6 +391,16 @@ class TheElderBlood:
         :param timeout:
         :return:
         """
+        start_time = time.time()
+        while True:
+            try:
+                ctx.get(url)
+                break
+            except (TimeoutException, WebDriverException):
+                if time.time() - start_time < timeout:
+                    ctx.refresh()
+                    continue
+                raise GetPageTimeoutException
 
     def check_heartbeat(self, debug: bool = False):
         """检测实例的健康状态"""
@@ -621,6 +631,8 @@ class TheElderBlood:
                 ">>> https://developers.google.com/recaptcha/docs/faq#"
                 "my-computer-or-network-may-be-sending-automated-queries"
             )
+        except InvalidSessionIdException:
+            pass
         except WebDriverException as e:
             logger.exception(e)
         finally:
